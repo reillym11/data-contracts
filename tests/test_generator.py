@@ -9,7 +9,7 @@ from decimal import ROUND_HALF_UP, Decimal
 
 
 import gen
-from conftest import INPUT_TOPICS, ROOT, SAMPLE_ARGS
+from conftest import INPUT_TOPICS, ROOT, SAMPLE_ARGS, Run
 
 VIN_RE = re.compile(r"^SYN[A-HJ-NPR-Z0-9]{14}$")
 TWO_HOURS_MS = 2 * 3600 * 1000
@@ -285,6 +285,20 @@ def test_charging_sessions_are_well_formed(run):
             for f in ("connector_type", "charger_type", "charger_lat", "charger_lon"):
                 assert a[f] == b[f]
     assert no_stop == gen.quota(len(ss), 0.03, minimum=1)
+
+
+def test_sessions_of_a_vin_are_45_minutes_apart(tmp_path):
+    # the default-size run, where a 40-minute pad produced gaps under 45 minutes
+    out = tmp_path / "default"
+    run = Run(out, gen.generate(out=str(out)))
+    by_vin = defaultdict(list)
+    for s in sessions(run):
+        by_vin[s[0]["vin"]].append((ms(s[0]["event_time"]), ms(s[-1]["event_time"])))
+    assert any(len(spans) > 1 for spans in by_vin.values())
+    for spans in by_vin.values():
+        spans.sort()
+        for (_, end), (start, _) in zip(spans, spans[1:]):
+            assert start - end >= gen.MIN_SESSION_GAP_MS
 
 
 def test_energy_never_decreases(run):
