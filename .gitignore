@@ -1,0 +1,8 @@
+# Generated fixtures are not committed, except the small sample.
+fixtures/*
+!fixtures/sample/
+
+__pycache__/
+*.pyc
+.pytest_cache/
+.venv/
