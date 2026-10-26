@@ -12,6 +12,7 @@ contracts/topics/<topic>.schema.json   one JSON Schema (Draft 2020-12) per topic
 contracts/topics.yaml                  topic registry
 generator/gen.py                       deterministic generator (Python standard library only)
 fixtures/sample/                       committed sample: --seed 42 --vehicles 20 --hours 6
+fixtures/edge/                         hand-built edge cases, inputs only
 tests/                                 pytest suite
 ```
 
@@ -32,6 +33,28 @@ The generator writes one JSONL file per input topic and a `MANIFEST.json` with t
 event type, duplicate and late counts, maximum lateness and the SHA-256 of each file. The same arguments always
 produce byte-identical files: all randomness comes from `random.Random(seed)`, and the generator never reads the
 clock or the network. Each line is `json.dumps(record, sort_keys=True, separators=(",", ":"))`.
+
+## Edge fixture
+
+`fixtures/edge/` is a small hand-built input fixture with one JSONL file per input topic and a `MANIFEST.json`
+(window, VINs, record counts per event type, SHA-256 of each file). It holds inputs only: no expected outputs.
+It uses the same line format, envelope and heartbeat rule as the generator. Window: 2026-10-01T00:00:00.000Z to
+06:00:00.000Z. `tests/test_edge.py` validates every record against its schema and checks the manifest.
+
+| Topic | VIN | Records |
+|---|---|---|
+| `vehicle.diagnostics.dtc.v1` | `SYNEDGEDTC0000001` | severity 3 active at (37.12500, -122.12500); severity 3 cleared at (37.13500, -122.13500); severity 2 active at (29.99500, -95.37500) |
+| `vehicle.diagnostics.dtc.v1` | `SYNEDGEDTC0000002` | severity 3 active at (-37.12500, 122.12500); severity 2 cleared at (-29.99500, 95.37500); severity 3 active at (33.44500, -112.07500) |
+| `vehicle.charging.events.v1` | `SYNEDGECHG0000001` | charge_start 01:00, charge_progress 01:05, charge_stop at 01:35:00.000, exactly 30:00.000 after the previous event |
+| `vehicle.charging.events.v1` | `SYNEDGECHG0000002` | charge_start 01:00, charge_progress 01:05, charge_stop at 01:35:00.001, 30:00.001 after the previous event |
+| `vehicle.charging.events.v1` | `SYNEDGECHG0000003` | charge_start 02:00, charge_progress 02:05, 02:10, 02:15 and no charge_stop; the 02:05 event appears twice (byte-identical); the 02:10 event arrives after the 02:15 event, exactly 300 seconds late |
+| `vehicle.ota.status.v1` | `SYNEDGEUPD0000001` | campaign `OTA-2026.10.1`: downloaded 03:00 (seq 1), installed 03:06 (seq 2), installed 03:10 (seq 3), failed 03:10 (seq 4). Arrival order: seq 1, 4, 3, 2, so seq 2 arrives after two events with a later `event_time` |
+| `vehicle.battery.health.v1` | `SYNEDGEBAT0000001` | samples at 00:50, 01:00 and 01:10; its heartbeat is at 03:10:00.000 |
+| `vehicle.battery.health.v1` | `SYNEDGEBAT0000002` | samples at 02:00, 02:30 and 02:50 |
+
+All times are 2026-10-01 UTC, with `.000` milliseconds unless shown. Every VIN has exactly one heartbeat on every
+input topic, as its last line there: its last event time on that topic + 2 hours, or 08:00:00.000 (window end
++ 2 hours) if it has no events on that topic.
 
 ## Topics
 
