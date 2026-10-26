@@ -1,0 +1,58 @@
+{
+  "description": "Hand-built edge-case input fixture. Inputs only; see README.md, section Edge fixture.",
+  "schema_version": "1",
+  "topics": {
+    "vehicle.battery.health.v1": {
+      "file": "vehicle.battery.health.v1.jsonl",
+      "records": 14,
+      "records_by_event_type": {
+        "battery_sample": 6,
+        "heartbeat": 8
+      },
+      "sha256": "ad31da9f668f0aeb32613537a8e6afb97fe8731fb202206af993b4b622d052a6"
+    },
+    "vehicle.charging.events.v1": {
+      "file": "vehicle.charging.events.v1.jsonl",
+      "records": 19,
+      "records_by_event_type": {
+        "charge_progress": 6,
+        "charge_start": 3,
+        "charge_stop": 2,
+        "heartbeat": 8
+      },
+      "sha256": "f98c6b2a1df19a03d1a179fbdd661e3e4ec6b6477796bd3a6fec0b328b8eabcd"
+    },
+    "vehicle.diagnostics.dtc.v1": {
+      "file": "vehicle.diagnostics.dtc.v1.jsonl",
+      "records": 14,
+      "records_by_event_type": {
+        "dtc": 6,
+        "heartbeat": 8
+      },
+      "sha256": "94a07499bb9287048e4835385f9cea4baa8c8ed3eb9999d2b2a6df6a7f772e09"
+    },
+    "vehicle.ota.status.v1": {
+      "file": "vehicle.ota.status.v1.jsonl",
+      "records": 12,
+      "records_by_event_type": {
+        "heartbeat": 8,
+        "ota_status": 4
+      },
+      "sha256": "60a85de5d112e8da48fb032e7d6391e22523fad0823b3ae9cbe0f11ed93cc897"
+    }
+  },
+  "vins": [
+    "SYNEDGEBAT0000001",
+    "SYNEDGEBAT0000002",
+    "SYNEDGECHG0000001",
+    "SYNEDGECHG0000002",
+    "SYNEDGECHG0000003",
+    "SYNEDGEDTC0000001",
+    "SYNEDGEDTC0000002",
+    "SYNEDGEUPD0000001"
+  ],
+  "window": {
+    "end": "2026-10-01T06:00:00.000Z",
+    "start": "2026-10-01T00:00:00.000Z"
+  }
+}

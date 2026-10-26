@@ -1,6 +1,7 @@
-# Generated fixtures are not committed, except the small sample.
+# Generated fixtures are not committed, except the small sample and the hand-built edge fixture.
 fixtures/*
 !fixtures/sample/
+!fixtures/edge/
 
 __pycache__/
 *.pyc
