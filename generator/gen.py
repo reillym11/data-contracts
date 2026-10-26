@@ -68,6 +68,7 @@ SITE_RADIUS_KM = 30.0
 SITES_PER_MARKET = 40
 DC_SITES_PER_MARKET = 15
 GAP_TIMEOUT_MS = 30 * 60 * 1000
+MIN_SESSION_GAP_MS = 45 * 60 * 1000
 HEARTBEAT_OFFSET_MS = 2 * 60 * 60 * 1000
 MAX_LATENESS_MS = 300 * 1000
 DUP_RATE = 0.02
@@ -246,8 +247,9 @@ def plan_vehicle(rng: random.Random, v: Vehicle, sites, t0: int, t1: int, hours:
         kinds = [weighted(rng, [("home", 65), ("ac_l2", 25), ("dc_fast", 10)]) for _ in range(n_sessions)]
     for kind in kinds:
         dur = rng.randint(20, 45) * MIN if kind == "dc_fast" else rng.randint(60, 240) * MIN
-        # sessions are separated by more than the gap timeout so a missing charge_stop closes by gap
-        s = place(rng, busy, t0 + edge, t1 - edge, dur, GAP_TIMEOUT_MS + 10 * MIN)
+        # sessions are separated by more than the gap timeout plus max lateness, so a missing charge_stop
+        # closes by gap and a late event is never within the gap timeout of a neighboring session
+        s = place(rng, busy, t0 + edge, t1 - edge, dur, MIN_SESSION_GAP_MS)
         if s is None:
             continue
         busy.append((s, s + dur))
